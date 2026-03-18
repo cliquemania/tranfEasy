@@ -1,0 +1,44 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:tranfEasy}",
+            "name": "Debug tranfEasy",
+            "target": "tranfEasy",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug tranfEasy"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:tranfEasy}",
+            "name": "Release tranfEasy",
+            "target": "tranfEasy",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release tranfEasy"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:tranfEasy}",
+            "name": "Debug TransferKitTests",
+            "target": "TransferKitTests",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug TransferKitTests"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:tranfEasy}",
+            "name": "Release TransferKitTests",
+            "target": "TransferKitTests",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release TransferKitTests"
+        }
+    ]
+}
