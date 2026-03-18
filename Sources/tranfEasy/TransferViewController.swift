@@ -133,7 +133,6 @@ final class TransferViewController: NSViewController, NSTableViewDataSource, NST
 
     func dropZoneView(_ view: DropZoneView, didReceive urls: [URL]) {
         store.add(urls: urls)
-        feedbackLabel.stringValue = "\(urls.count) item(ns) adicionados."
     }
 
     private func configureStore() {
@@ -234,6 +233,13 @@ final class TransferViewController: NSViewController, NSTableViewDataSource, NST
         removeSelectedButton.isEnabled = tableView.selectedRow >= 0 && tableView.selectedRow < store.items.count
         clearButton.isEnabled = store.hasItems
         sendButton.isEnabled = store.hasItems && store.destinationURL != nil
+
+        if store.hasItems {
+            let (files, dirs) = countFilesAndDirs(in: store.items.map(\.url))
+            listTitleLabel.stringValue = "Itens recebidos — \(files) arquivo(s), \(dirs) pasta(s)"
+        } else {
+            listTitleLabel.stringValue = "Itens recebidos"
+        }
     }
 
     func numberOfRows(in tableView: NSTableView) -> Int {
@@ -451,6 +457,34 @@ final class TransferViewController: NSViewController, NSTableViewDataSource, NST
         return urls.filter { !standardPaths.contains($0.standardizedFileURL.path) }
     }
 
+    /// Counts total files and directories recursively for a list of URLs.
+    private func countFilesAndDirs(in urls: [URL]) -> (files: Int, dirs: Int) {
+        let fm = FileManager.default
+        var files = 0
+        var dirs = 0
+
+        func walk(_ url: URL) {
+            var isDir: ObjCBool = false
+            guard fm.fileExists(atPath: url.path, isDirectory: &isDir) else { return }
+
+            if isDir.boolValue {
+                dirs += 1
+                if let children = try? fm.contentsOfDirectory(
+                    at: url,
+                    includingPropertiesForKeys: [.isDirectoryKey],
+                    options: [.skipsHiddenFiles]
+                ) {
+                    for child in children { walk(child) }
+                }
+            } else {
+                files += 1
+            }
+        }
+
+        for url in urls { walk(url) }
+        return (files, dirs)
+    }
+
     @objc private func removeSelected() {
         let selectedRow = tableView.selectedRow
         guard selectedRow >= 0 && selectedRow < store.items.count else { return }
@@ -470,9 +504,10 @@ final class TransferViewController: NSViewController, NSTableViewDataSource, NST
             return
         }
 
+        let (files, dirs) = countFilesAndDirs(in: store.items.map(\.url))
         let alert = NSAlert()
         alert.messageText = "Confirmar envio"
-        alert.informativeText = "Enviar \(store.items.count) item(ns) para:\n\n\(destinationURL.path)\n\nConflitos por nome serao substituidos pela origem."
+        alert.informativeText = "Enviar \(files) arquivo(s) e \(dirs) pasta(s) para:\n\n\(destinationURL.path)\n\nConflitos por nome serao substituidos pela origem."
         alert.alertStyle = .informational
         alert.addButton(withTitle: "Enviar")
         alert.addButton(withTitle: "Cancelar")
